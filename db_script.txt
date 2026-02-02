@@ -1,0 +1,296 @@
+CREATE DATABASE Logistics;
+GO
+USE Logistics;
+GO
+
+CREATE TABLE Units (
+    UnitID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(15)
+);
+
+CREATE TABLE ProductCategories (
+    ProductCategoryID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(25)
+);
+
+CREATE TABLE ProductStatuses (
+    ProductStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Products (
+    ProductID INT IDENTITY PRIMARY KEY,
+    Article NVARCHAR(30),
+    Name NVARCHAR(50),
+    ProductCategoryID INT,
+    Description NVARCHAR(255),
+    UnitID INT,
+    ProductStatusID INT,
+    FOREIGN KEY (ProductCategoryID) REFERENCES ProductCategories(ProductCategoryID),
+    FOREIGN KEY (UnitID) REFERENCES Units(UnitID),
+    FOREIGN KEY (ProductStatusID) REFERENCES ProductStatuses(ProductStatusID)
+);
+
+CREATE TABLE MaterialTypes (
+    MaterialTypeID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Materials (
+    MaterialID INT IDENTITY PRIMARY KEY,
+    Code NVARCHAR(10),
+    Name NVARCHAR(50),
+    MaterialTypeID INT,
+    UnitID INT,
+    MinStock DECIMAL(18,2),
+    MarketPrice DECIMAL(18,2),
+    FOREIGN KEY (MaterialTypeID) REFERENCES MaterialTypes(MaterialTypeID),
+    FOREIGN KEY (UnitID) REFERENCES Units(UnitID)
+);
+
+CREATE TABLE BillOfMaterials (
+    BillOfMaterialsID INT IDENTITY PRIMARY KEY,
+    ProductID INT,
+    MaterialID INT,
+    Quantity DECIMAL(18,2),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID)
+);
+
+CREATE TABLE TechRoutes (
+    TechRouteID INT IDENTITY PRIMARY KEY,
+    ProductID INT,
+    Name NVARCHAR(30),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+CREATE TABLE TechOperations (
+    TechOperationID INT IDENTITY PRIMARY KEY,
+    TechRouteID INT,
+    Name NVARCHAR(50),
+    SequenceNumber INT,
+    DurationMinutes INT,
+    FOREIGN KEY (TechRouteID) REFERENCES TechRoutes(TechRouteID)
+);
+
+CREATE TABLE Suppliers (
+    SupplierID INT IDENTITY PRIMARY KEY,
+    INN NVARCHAR(20),
+    Name NVARCHAR(50),
+    Email NVARCHAR(30),
+    ReliabilityRating INT,
+    PaymentTerms NVARCHAR(50)
+);
+
+CREATE TABLE WarehouseTypes (
+    WarehouseTypeID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Warehouses (
+    WarehouseID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(30),
+    WarehouseTypeID INT,
+    FOREIGN KEY (WarehouseTypeID) REFERENCES WarehouseTypes(WarehouseTypeID)
+);
+
+CREATE TABLE Positions (
+    PositionID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Departments (
+    DepartmentID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Qualifications (
+    QualificationID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE SalaryTypes (
+    SalaryTypeID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE EmployeeStatuses (
+    EmployeeStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Employees (
+    EmployeeID INT IDENTITY PRIMARY KEY,
+    PhoneNumber NVARCHAR(15),
+    Surname NVARCHAR(30),
+    Name NVARCHAR(30),
+    MiddleName NVARCHAR(30),
+    PositionID INT,
+    DepartmentID INT,
+    QualificationID INT,
+    SalaryTypeID INT,
+    EmployeeStatusID INT,
+    FOREIGN KEY (PositionID) REFERENCES Positions(PositionID),
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID),
+    FOREIGN KEY (QualificationID) REFERENCES Qualifications(QualificationID),
+    FOREIGN KEY (SalaryTypeID) REFERENCES SalaryTypes(SalaryTypeID),
+    FOREIGN KEY (EmployeeStatusID) REFERENCES EmployeeStatuses(EmployeeStatusID)
+);
+
+CREATE TABLE PurchaseStatuses (
+    PurchaseStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE PurchaseOrders (
+    PurchaseOrderID INT IDENTITY PRIMARY KEY,
+    SupplierID INT,
+    WarehouseID INT, 
+    EmployeeID INT, 
+    OrderDate DATE,
+    ExpectedDate DATE, 
+    PurchaseStatusID INT,
+    FOREIGN KEY (SupplierID) REFERENCES Suppliers(SupplierID),
+    FOREIGN KEY (WarehouseID) REFERENCES Warehouses(WarehouseID),
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (PurchaseStatusID) REFERENCES PurchaseStatuses(PurchaseStatusID)
+);
+
+CREATE TABLE PurchaseReceipts (
+    PurchaseReceiptID INT IDENTITY PRIMARY KEY,
+    PurchaseOrderID INT,
+    ReceiptDate DATE,
+    AcceptedQuantity DECIMAL(18,2),
+    DefectQuantity DECIMAL(18,2),
+    FOREIGN KEY (PurchaseOrderID) REFERENCES PurchaseOrders(PurchaseOrderID)
+);
+
+CREATE TABLE StockBalances (
+    StockBalanceID INT IDENTITY PRIMARY KEY,
+    WarehouseID INT,
+    MaterialID INT,
+    Quantity DECIMAL(18,2),
+    FOREIGN KEY (WarehouseID) REFERENCES Warehouses(WarehouseID),
+    FOREIGN KEY (MaterialID) REFERENCES Materials(MaterialID)
+);
+
+CREATE TABLE Clients (
+    ClientID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(50),
+    Email NVARCHAR(30)
+);
+
+CREATE TABLE ProductionOrderStatuses (
+    ProductionOrderStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE ProductionOrders (
+    ProductionOrderID INT IDENTITY PRIMARY KEY,
+    ClientID INT,
+    ProductID INT,
+    Quantity INT,
+    Priority INT,
+    Deadline DATE,
+    ProductionOrderStatusID INT,
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
+    FOREIGN KEY (ProductionOrderStatusID) REFERENCES ProductionOrderStatuses(ProductionOrderStatusID)
+);
+
+CREATE TABLE ProductionStageStatuses (
+    ProductionStageStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Stages (
+    StageID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE ProductionStages (
+    ProductionStageID INT IDENTITY PRIMARY KEY,
+    ProductionOrderID INT,
+    StageID INT,
+    ProductionStageStatusID INT,
+    FOREIGN KEY (ProductionOrderID) REFERENCES ProductionOrders(ProductionOrderID),
+    FOREIGN KEY (StageID) REFERENCES Stages(StageID),
+    FOREIGN KEY (ProductionStageStatusID) REFERENCES ProductionStageStatuses(ProductionStageStatusID)
+);
+
+CREATE TABLE Models (
+    ModelID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE EquipmentTypes (
+    EquipmentTypeID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE EquipmentStatuses (
+    EquipmentStatusID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(20)
+);
+
+CREATE TABLE Equipment (
+    EquipmentID INT IDENTITY PRIMARY KEY,
+    InventoryNumber NVARCHAR(10),
+    ModelID INT,
+    EquipmentTypeID INT,
+    CommissionDate DATE,
+    EquipmentStatusID INT,
+    MaintenanceSchedule NVARCHAR(100),
+    FOREIGN KEY (ModelID) REFERENCES Models(ModelID),
+    FOREIGN KEY (EquipmentTypeID) REFERENCES EquipmentTypes(EquipmentTypeID),
+    FOREIGN KEY (EquipmentStatusID) REFERENCES EquipmentStatuses(EquipmentStatusID)
+);
+
+CREATE TABLE QualityDefects (
+    QualityDefectID INT IDENTITY PRIMARY KEY,
+    ProductionStageID INT,
+    Description NVARCHAR(255),
+    DefectDate DATE,
+    FOREIGN KEY (ProductionStageID) REFERENCES ProductionStages(ProductionStageID)
+);
+
+CREATE TABLE WorkLogs (
+    WorkLogID INT IDENTITY PRIMARY KEY,
+    EmployeeID INT,
+    ProductionStageID INT,
+    HoursWorked DECIMAL(5,2),
+    WorkDate DATE,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
+    FOREIGN KEY (ProductionStageID) REFERENCES ProductionStages(ProductionStageID)
+);
+
+CREATE TABLE EquipmentUsageLogs (
+    EquipmentUsageLogID INT IDENTITY PRIMARY KEY,
+    EquipmentID INT,
+    ProductionStageID INT,
+    UsageHours DECIMAL(5,2),
+    UsageDate DATE,
+    FOREIGN KEY (EquipmentID) REFERENCES Equipment(EquipmentID),
+    FOREIGN KEY (ProductionStageID) REFERENCES ProductionStages(ProductionStageID)
+);
+
+CREATE TABLE Roles (
+    RoleID INT IDENTITY PRIMARY KEY,
+    Name NVARCHAR(30)
+);
+
+CREATE TABLE [Users] (
+    UserID INT IDENTITY PRIMARY KEY,
+    Login NVARCHAR(30),
+    Password NVARCHAR(30),
+    RoleID INT,
+    EmployeeID INT,
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+GO
+
+USE Logistics;
+GO
+
+
